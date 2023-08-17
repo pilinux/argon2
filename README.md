@@ -13,7 +13,7 @@ to provide an extra layer of security on top of the existing `Key` and `IDKey` f
 by including an additional secret.
 
 One of the standout features of this package is the seamless integration of a user-friendly
-wrapper (an improved version of [github.com/alexedwards/argon2id][03]). The wrapper
+wrapper (an improved version of `github.com/alexedwards/argon2id`). The wrapper
 encapsulates the complexities of the underlying argon2 package, offering a simplified
 and intuitive interface for developers across different projects.
 
