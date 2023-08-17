@@ -73,6 +73,12 @@ func Key(password, salt []byte, time, memory uint32, threads uint8, keyLen uint3
 	return deriveKey(argon2i, password, salt, nil, nil, time, memory, threads, keyLen)
 }
 
+// KeyWithSecret adds an extra layer of security on top of the existing Key
+// function by including an additional secret.
+func KeyWithSecret(password, salt, secret []byte, time, memory uint32, threads uint8, keyLen uint32) []byte {
+	return deriveKey(argon2i, password, salt, secret, nil, time, memory, threads, keyLen)
+}
+
 // IDKey derives a key from the password, salt, and cost parameters using
 // Argon2id returning a byte slice of length keyLen that can be used as
 // cryptographic key. The CPU cost and parallelism degree must be greater than
@@ -95,6 +101,12 @@ func Key(password, salt []byte, time, memory uint32, threads uint8, keyLen uint3
 // good random salt.
 func IDKey(password, salt []byte, time, memory uint32, threads uint8, keyLen uint32) []byte {
 	return deriveKey(argon2id, password, salt, nil, nil, time, memory, threads, keyLen)
+}
+
+// IDKeyWithSecret adds an extra layer of security on top of the existing IDKey
+// function by including an additional secret.
+func IDKeyWithSecret(password, salt, secret []byte, time, memory uint32, threads uint8, keyLen uint32) []byte {
+	return deriveKey(argon2id, password, salt, secret, nil, time, memory, threads, keyLen)
 }
 
 func deriveKey(mode int, password, salt, secret, data []byte, time, memory uint32, threads uint8, keyLen uint32) []byte {
