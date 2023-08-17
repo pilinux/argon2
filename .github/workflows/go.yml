@@ -1,0 +1,52 @@
+name: Go
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+
+    steps:
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.21
+      - run: go version
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Examine source code
+        run: go vet -v ./...
+
+      - name: Gosec security scanner
+        uses: securego/gosec@master
+        with:
+          args: -include=G102,G103,G104,G106,G107,G108,G109,G110,G111,G112,G113,G114,G201,G202,G203,G204,G205 ./...
+
+      - name: Build
+        run: go build -v ./...
+
+      - name: Test
+        if: github.event_name == 'push'
+        run: go test -v -cover -coverprofile=coverage.txt -covermode=atomic ./...
+
+      - name: Upload coverage to Codecov
+        if: github.event_name == 'push'
+        run: bash <(curl -s https://codecov.io/bash)
+
+      - name: Update Go report card
+        if: github.event_name == 'push'
+        uses: creekorful/goreportcard-action@v1.0
