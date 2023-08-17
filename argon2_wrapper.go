@@ -175,13 +175,10 @@ func IDCreateHash(password, secret string, params *Params) (hash string, err err
 	}
 	if secret != "" {
 		key = IDKeyWithSecret([]byte(password), []byte(secret), salt, params.Iterations, params.Memory, params.Parallelism, params.KeyLength)
-		fmt.Println("here")
 	}
 
 	b64Salt := base64.RawStdEncoding.EncodeToString(salt)
 	b64Key := base64.RawStdEncoding.EncodeToString(key)
-	fmt.Println(key)
-	fmt.Println(b64Key)
 
 	hash = fmt.Sprintf("$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s", Version, params.Memory, params.Iterations, params.Parallelism, b64Salt, b64Key)
 	return hash, nil
