@@ -46,6 +46,8 @@ jobs:
       - name: Upload coverage to Codecov
         if: github.event_name == 'push'
         run: bash <(curl -s https://codecov.io/bash)
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Update Go report card
         if: github.event_name == 'push'
