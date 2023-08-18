@@ -1,5 +1,14 @@
 # argon2 Unofficial
 
+![CodeQL][11]
+![Build][12]
+![Linter][13]
+[![Codecov][14]][15]
+[![Go Reference][16]][17]
+[![Go Report Card][18]][19]
+[![CodeFactor][20]][21]
+[![CodeBeat][22]][23]
+
 Package argon2 is an improved version of the [official Go argon2][01] hashing package.
 
 Features missing from the official Go [argon2][01] package:
@@ -129,3 +138,16 @@ For guidance, visit: [rfc9106][04]
 [02]: https://pages.nist.gov/800-63-3/sp800-63b.html
 [03]: github.com/alexedwards/argon2id
 [04]: https://datatracker.ietf.org/doc/html/rfc9106#name-argon2-algorithm
+[11]: https://github.com/pilinux/argon2/actions/workflows/codeql-analysis.yml/badge.svg
+[12]: https://github.com/pilinux/argon2/actions/workflows/go.yml/badge.svg
+[13]: https://github.com/pilinux/argon2/actions/workflows/golangci-lint.yml/badge.svg
+[14]: https://codecov.io/gh/pilinux/argon2/graph/badge.svg?token=B3TY4DDNJP
+[15]: https://codecov.io/gh/pilinux/argon2
+[16]: https://pkg.go.dev/badge/github.com/pilinux/argon2
+[17]: https://pkg.go.dev/github.com/pilinux/argon2
+[18]: https://goreportcard.com/badge/github.com/pilinux/argon2
+[19]: https://goreportcard.com/report/github.com/pilinux/argon2
+[20]: https://www.codefactor.io/repository/github/pilinux/argon2/badge
+[21]: https://www.codefactor.io/repository/github/pilinux/argon2
+[22]: https://codebeat.co/badges/525303e8-8be8-4c50-8d21-a74df9371cbc
+[23]: https://codebeat.co/projects/github-com-pilinux-argon2-main
