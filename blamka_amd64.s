@@ -3,7 +3,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build amd64 && gc && !purego
-// +build amd64,gc,!purego
 
 #include "textflag.h"
 
@@ -197,13 +196,11 @@ TEXT ·blamkaSSE4(SB), 4, $0-8
 
 // func mixBlocksSSE2(out, a, b, c *block)
 TEXT ·mixBlocksSSE2(SB), 4, $0-32
-	// Save the original BP value
-	MOVQ BP, CX
 	MOVQ out+0(FP), DX
 	MOVQ a+8(FP), AX
 	MOVQ b+16(FP), BX
 	MOVQ c+24(FP), CX
-	MOVQ $128, BP
+	MOVQ $128, DI
 
 loop:
 	MOVOU 0(AX), X0
@@ -216,21 +213,17 @@ loop:
 	ADDQ  $16, BX
 	ADDQ  $16, CX
 	ADDQ  $16, DX
-	SUBQ  $2, BP
+	SUBQ  $2, DI
 	JA    loop
-	// Restore the original BP value
-	MOVQ CX, BP
 	RET
 
 // func xorBlocksSSE2(out, a, b, c *block)
 TEXT ·xorBlocksSSE2(SB), 4, $0-32
-	// Save the original BP value
-	MOVQ BP, CX
 	MOVQ out+0(FP), DX
 	MOVQ a+8(FP), AX
 	MOVQ b+16(FP), BX
 	MOVQ c+24(FP), CX
-	MOVQ $128, BP
+	MOVQ $128, DI
 
 loop:
 	MOVOU 0(AX), X0
@@ -245,8 +238,6 @@ loop:
 	ADDQ  $16, BX
 	ADDQ  $16, CX
 	ADDQ  $16, DX
-	SUBQ  $2, BP
+	SUBQ  $2, DI
 	JA    loop
-	// Restore the original BP value
-	MOVQ CX, BP
 	RET
