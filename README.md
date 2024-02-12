@@ -1,4 +1,4 @@
-# argon2 Unofficial
+# argon2 unofficial
 
 ![CodeQL][11]
 ![Build][12]
@@ -13,7 +13,7 @@ Package argon2 is an improved version of the [official Go argon2][01] hashing pa
 
 Features missing from the official Go [argon2][01] package:
 -  [NIST 800-63B][02] recommends using a secret value of at least 112 bits.
-But as of now (golang.org/x/crypto v0.12.0), `Key` and `IDkey` functions pass `nil`
+But as of now (golang.org/x/crypto v0.19.0), `Key` and `IDkey` functions pass `nil`
 value when calling `deriveKey` function.
 -  Does not provide any straightforward way for password hashing and verification.
 
@@ -134,7 +134,7 @@ hash, err := argon2.CreateHash("pa$$word", "", params)
 For guidance, visit: [rfc9106][04]
 
 
-[01]: https://pkg.go.dev/golang.org/x/crypto@v0.12.0/argon2
+[01]: https://pkg.go.dev/golang.org/x/crypto@v0.19.0/argon2
 [02]: https://pages.nist.gov/800-63-3/sp800-63b.html
 [03]: github.com/alexedwards/argon2id
 [04]: https://datatracker.ietf.org/doc/html/rfc9106#name-argon2-algorithm
