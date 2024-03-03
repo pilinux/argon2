@@ -53,11 +53,12 @@ jobs:
         if: github.event_name == 'push'
         run: go test -v -cover -coverprofile=coverage.txt -covermode=atomic ./...
 
-      - name: Upload coverage to Codecov
+      - name: Upload coverage reports to Codecov
         if: github.event_name == 'push'
-        run: bash <(curl -s https://codecov.io/bash)
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: pilinux/argon2
 
       - name: Update Go report card
         if: github.event_name == 'push'
