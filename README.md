@@ -7,15 +7,15 @@
 [![Go Reference][16]][17]
 [![Go Report Card][18]][19]
 [![CodeFactor][20]][21]
-[![CodeBeat][22]][23]
 
 Package argon2 is an improved version of the [official Go argon2][01] hashing package.
 
 Features missing from the official Go [argon2][01] package:
--  [NIST 800-63B][02] recommends using a secret value of at least 112 bits.
-But as of now (golang.org/x/crypto v0.19.0), `Key` and `IDkey` functions pass `nil`
-value when calling `deriveKey` function.
--  Does not provide any straightforward way for password hashing and verification.
+
+- [NIST 800-63B][02] recommends using a secret value of at least 112 bits.
+  But as of now (golang.org/x/crypto v0.19.0), `Key` and `IDkey` functions pass `nil`
+  value when calling `deriveKey` function.
+- Does not provide any straightforward way for password hashing and verification.
 
 This package contains two additional functions `KeyWithSecret` and `IDKeyWithSecret`
 to provide an extra layer of security on top of the existing `Key` and `IDKey` functions
@@ -133,7 +133,6 @@ hash, err := argon2.CreateHash("pa$$word", "", params)
 
 For guidance, visit: [rfc9106][04]
 
-
 [01]: https://pkg.go.dev/golang.org/x/crypto@v0.19.0/argon2
 [02]: https://pages.nist.gov/800-63-3/sp800-63b.html
 [03]: github.com/alexedwards/argon2id
@@ -149,5 +148,3 @@ For guidance, visit: [rfc9106][04]
 [19]: https://goreportcard.com/report/github.com/pilinux/argon2
 [20]: https://www.codefactor.io/repository/github/pilinux/argon2/badge
 [21]: https://www.codefactor.io/repository/github/pilinux/argon2
-[22]: https://codebeat.co/badges/525303e8-8be8-4c50-8d21-a74df9371cbc
-[23]: https://codebeat.co/projects/github-com-pilinux-argon2-main
