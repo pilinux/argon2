@@ -312,7 +312,7 @@ func DecodeHash(hash string) (argon2Variant int, params *Params, salt, key []byt
 	// hash: HAHY7gZ9CgbAFRQmQLk7v7uDEgomp2CSO/rrEBAvfHg
 	val, hash, found = strings.Cut(hash, "$")
 	if !found {
-		// test case: four_$$
+		// test case: four_$
 		return argon2Variant, nil, nil, nil, ErrInvalidHash
 	}
 
