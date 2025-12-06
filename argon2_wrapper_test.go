@@ -125,36 +125,139 @@ func TestComparePasswordAndHash(t *testing.T) {
 }
 
 func TestDecodeHash(t *testing.T) {
-	// Argon2i
-	hash, err := CreateHash("pa$$word", "$€cr€t", DefaultParams)
-	if err != nil {
-		t.Fatal(err)
-	}
-	argon2Variant, params, _, _, err := DecodeHash(hash)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if *params != *DefaultParams {
-		t.Fatalf("expected %#v got %#v", *DefaultParams, *params)
-	}
-	if argon2Variant != argon2i {
-		t.Fatalf("argon2 variant: expected %v got %v", argon2i, argon2Variant)
+	tests := []struct {
+		name          string
+		hash          string
+		wantVariant   int
+		wantError     bool
+		strictNewLine bool // expect ErrInvalidHash if strict newline check works
+	}{
+		{
+			name:        "valid_argon2i",
+			hash:        "$argon2i$v=19$m=65536,t=1,p=2$iU5CxpZvvxDy2X3Q4GLjNw$ltpcxJNlwXbPr2KWxM2uLlOroRSt0xfdvyAAWhjJRA8",
+			wantVariant: argon2i,
+			wantError:   false,
+		},
+		{
+			name:        "valid_argon2id",
+			hash:        "$argon2id$v=19$m=65536,t=1,p=2$RmJMUEPYPYPezp1PY4CYdg$E2RuNE2grivEJV2AuW9J11Goxl8iGGHIiCRs/HU4jd4",
+			wantVariant: argon2id,
+			wantError:   false,
+		},
+		{
+			name:      "zero_$",
+			hash:      "_argon2id_v=19_m=65536,t=1,p=2_RmJMUEPYPYPezp1PY4CYdg_E2RuNE2grivEJV2AuW9J11Goxl8iGGHIiCRs/HU4jd4",
+			wantError: true,
+		},
+		{
+			name:      "one_$",
+			hash:      "$argon2id_v=19_m=65536,t=1,p=2_RmJMUEPYPYPezp1PY4CYdg_E2RuNE2grivEJV2AuW9J11Goxl8iGGHIiCRs/HU4jd4",
+			wantError: true,
+		},
+		{
+			name:      "two_$",
+			hash:      "$argon2id$v=19_m=65536,t=1,p=2_RmJMUEPYPYPezp1PY4CYdg_E2RuNE2grivEJV2AuW9J11Goxl8iGGHIiCRs/HU4jd4",
+			wantError: true,
+		},
+		{
+			name:      "three_$",
+			hash:      "$argon2id$v=19$m=65536,t=1,p=2_RmJMUEPYPYPezp1PY4CYdg_E2RuNE2grivEJV2AuW9J11Goxl8iGGHIiCRs/HU4jd4",
+			wantError: true,
+		},
+		{
+			name:      "four_$",
+			hash:      "$argon2id$v=19$m=65536,t=1,p=2$RmJMUEPYPYPezp1PY4CYdg_E2RuNE2grivEJV2AuW9J11Goxl8iGGHIiCRs/HU4jd4",
+			wantError: true,
+		},
+		{
+			name:      "incompatible_variant",
+			hash:      "$argon2d$v=19$m=65536,t=1,p=2$salt$key",
+			wantError: true,
+		},
+		{
+			name:      "missing_version_section",
+			hash:      "$argon2id$m=65536,t=1,p=2$salt$key",
+			wantError: true,
+		},
+		{
+			name:      "malformed_version",
+			hash:      "$argon2id$v=XX$m=65536,t=1,p=2$salt$key",
+			wantError: true,
+		},
+		{
+			name:      "incompatible_version",
+			hash:      "$argon2id$v=99$m=65536,t=1,p=2$salt$key",
+			wantError: true,
+		},
+		{
+			name:      "missing_params_section",
+			hash:      "$argon2id$v=19$salt$key",
+			wantError: true,
+		},
+		{
+			name:      "malformed_params",
+			hash:      "$argon2id$v=19$m=fail,t=1,p=2$salt$key",
+			wantError: true,
+		},
+		{
+			name:      "missing_salt_section",
+			hash:      "$argon2id$v=19$m=65536,t=1,p=2$key",
+			wantError: true,
+		},
+		{
+			name:      "newline_in_salt",
+			hash:      "$argon2id$v=19$m=65536,t=1,p=2$salt\n$key",
+			wantError: true,
+		},
+		{
+			name:      "bad_base64_salt",
+			hash:      "$argon2id$v=19$m=65536,t=1,p=2$!@#$key",
+			wantError: true,
+		},
+		{
+			name:      "missing_key_section",
+			hash:      "$argon2id$v=19$m=65536,t=1,p=2$salt",
+			wantError: true,
+		},
+		{
+			name:      "newline_in_key",
+			hash:      "$argon2id$v=19$m=65536,t=1,p=2$salt$key\n",
+			wantError: true,
+		},
+		{
+			name:      "bad_base64_key",
+			hash:      "$argon2id$v=19$m=65536,t=1,p=2$salt$!@#",
+			wantError: true,
+		},
+		{
+			name:      "extra_fields_at_the_end",
+			hash:      "$argon2id$v=19$m=65536,t=1,p=2$salt$key$extra",
+			wantError: true,
+		},
 	}
 
-	// Argon2id
-	hash, err = IDCreateHash("pa$$word", "$€cr€t", DefaultParams)
-	if err != nil {
-		t.Fatal(err)
-	}
-	argon2Variant, params, _, _, err = DecodeHash(hash)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if *params != *DefaultParams {
-		t.Fatalf("expected %#v got %#v", *DefaultParams, *params)
-	}
-	if argon2Variant != argon2id {
-		t.Fatalf("argon2 variant: expected %v got %v", argon2id, argon2Variant)
+	for _, tc := range tests {
+		tc := tc // capture range variable
+		t.Run(tc.name, func(t *testing.T) {
+			variant, params, _, _, err := DecodeHash(tc.hash)
+			if tc.wantError {
+				if err == nil {
+					t.Errorf("expected error, got nil")
+				} else {
+					return
+				}
+			}
+
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if variant != tc.wantVariant {
+				t.Errorf("expected variant %d, got %d", tc.wantVariant, variant)
+			}
+			if params == nil {
+				t.Error("expected params, got nil")
+			}
+		})
 	}
 }
 
@@ -234,6 +337,25 @@ func TestStrictDecoding(t *testing.T) {
 	if ok {
 		t.Fatal("Hash validation should fail")
 	}
+
+	// hash contains newline in salt section (which base64 strict ignores but we should catch)
+	ok, _, err = CheckHash("bug", "", "$argon2id$v=19$m=65536,t=1,p=2$xXH1+P7o0rwI9/lXEcPWkg\n$HAHY7gZ9CgbAFRQmQLk7v7uDEgomp2CSO/rrEBAvfHg")
+	if err == nil {
+		t.Fatal("Hash validation should fail for newline in salt")
+	}
+	if ok {
+		t.Fatal("Hash validation should fail for newline in salt")
+	}
+
+	// hash contains newline in key section (which base64 strict ignores but we should catch)
+	ok, _, err = CheckHash("bug", "", "$argon2id$v=19$m=65536,t=1,p=2$xXH1+P7o0rwI9/lXEcPWkg$HAHY7gZ9CgbAFRQmQLk7v7uDEgomp2CSO/rrEBAvfHg\n")
+	if err == nil {
+		t.Fatal("Hash validation should fail for newline in key")
+	}
+	if ok {
+		t.Fatal("Hash validation should fail for newline in key")
+	}
+
 }
 
 func TestVariant(t *testing.T) {

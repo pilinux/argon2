@@ -237,48 +237,117 @@ func CheckHash(password, secret, hash string) (match bool, params *Params, err e
 func DecodeHash(hash string) (argon2Variant int, params *Params, salt, key []byte, err error) {
 	argon2Variant = -1 // incompatible variant
 
-	vals := strings.Split(hash, "$")
-	if len(vals) != 6 {
+	var (
+		val   string
+		found bool
+	)
+
+	// $argon2id$v=19$m=65536,t=1,p=2$xXH1+P7o0rwI9/lXEcPWkg$HAHY7gZ9CgbAFRQmQLk7v7uDEgomp2CSO/rrEBAvfHg
+	// hash: argon2id$v=19$m=65536,t=1,p=2$xXH1+P7o0rwI9/lXEcPWkg$HAHY7gZ9CgbAFRQmQLk7v7uDEgomp2CSO/rrEBAvfHg
+	_, hash, found = strings.Cut(hash, "$")
+	if !found {
+		// test case: zero_$
 		return argon2Variant, nil, nil, nil, ErrInvalidHash
 	}
 
-	if vals[1] != "argon2i" && vals[1] != "argon2id" {
-		return argon2Variant, nil, nil, nil, ErrIncompatibleVariant
-	}
-	if vals[1] == "argon2i" {
-		argon2Variant = argon2i
-	}
-	if vals[1] == "argon2id" {
-		argon2Variant = argon2id
+	// argon2id$v=19$m=65536,t=1,p=2$xXH1+P7o0rwI9/lXEcPWkg$HAHY7gZ9CgbAFRQmQLk7v7uDEgomp2CSO/rrEBAvfHg
+	// val: argon2id
+	// hash: v=19$m=65536,t=1,p=2$xXH1+P7o0rwI9/lXEcPWkg$HAHY7gZ9CgbAFRQmQLk7v7uDEgomp2CSO/rrEBAvfHg
+	val, hash, found = strings.Cut(hash, "$")
+	if !found {
+		// test case: one_$
+		return argon2Variant, nil, nil, nil, ErrInvalidHash
 	}
 
+	switch val {
+	case "argon2i":
+		argon2Variant = argon2i
+	case "argon2id":
+		argon2Variant = argon2id
+	default:
+		// test case: incompatible_variant
+		return argon2Variant, nil, nil, nil, ErrIncompatibleVariant
+	}
+
+	// v=19$m=65536,t=1,p=2$xXH1+P7o0rwI9/lXEcPWkg$HAHY7gZ9CgbAFRQmQLk7v7uDEgomp2CSO/rrEBAvfHg
+	// val: v=19
+	// hash: m=65536,t=1,p=2$xXH1+P7o0rwI9/lXEcPWkg$HAHY7gZ9CgbAFRQmQLk7v7uDEgomp2CSO/rrEBAvfHg
+	val, hash, found = strings.Cut(hash, "$")
+	if !found {
+		// test case: two_$
+		return argon2Variant, nil, nil, nil, ErrInvalidHash
+	}
+
+	// v=19
 	var version int
-	_, err = fmt.Sscanf(vals[2], "v=%d", &version)
+	_, err = fmt.Sscanf(val, "v=%d", &version)
 	if err != nil {
+		// test cases: missing_version_section, malformed_version
 		return argon2Variant, nil, nil, nil, err
 	}
 	if version != Version {
+		// test case: incompatible_version
 		return argon2Variant, nil, nil, nil, ErrIncompatibleVersion
 	}
 
+	// m=65536,t=1,p=2$xXH1+P7o0rwI9/lXEcPWkg$HAHY7gZ9CgbAFRQmQLk7v7uDEgomp2CSO/rrEBAvfHg
+	// val: m=65536,t=1,p=2
+	// hash: xXH1+P7o0rwI9/lXEcPWkg$HAHY7gZ9CgbAFRQmQLk7v7uDEgomp2CSO/rrEBAvfHg
+	val, hash, found = strings.Cut(hash, "$")
+	if !found {
+		// test case: three_$
+		return argon2Variant, nil, nil, nil, ErrInvalidHash
+	}
+
+	// m=65536,t=1,p=2
 	params = &Params{}
-	_, err = fmt.Sscanf(vals[3], "m=%d,t=%d,p=%d", &params.Memory, &params.Iterations, &params.Parallelism)
+	_, err = fmt.Sscanf(val, "m=%d,t=%d,p=%d", &params.Memory, &params.Iterations, &params.Parallelism)
 	if err != nil {
+		// test case: malformed_params
 		return argon2Variant, nil, nil, nil, err
 	}
 
-	salt, err = base64.RawStdEncoding.Strict().DecodeString(vals[4])
+	// xXH1+P7o0rwI9/lXEcPWkg$HAHY7gZ9CgbAFRQmQLk7v7uDEgomp2CSO/rrEBAvfHg
+	// val: xXH1+P7o0rwI9/lXEcPWkg
+	// hash: HAHY7gZ9CgbAFRQmQLk7v7uDEgomp2CSO/rrEBAvfHg
+	val, hash, found = strings.Cut(hash, "$")
+	if !found {
+		// test case: four_$$
+		return argon2Variant, nil, nil, nil, ErrInvalidHash
+	}
+
+	// DecodeString() ignores newline characters \r and \n
+	if strings.ContainsAny(val, "\r\n") {
+		// test case: newline_in_salt
+		return argon2Variant, nil, nil, nil, ErrInvalidHash
+	}
+
+	salt, err = base64.RawStdEncoding.Strict().DecodeString(val)
 	if err != nil {
+		// test case: bad_base64_salt
 		return argon2Variant, nil, nil, nil, err
 	}
 	params.SaltLength = uint32(len(salt))
 
-	key, err = base64.RawStdEncoding.Strict().DecodeString(vals[5])
+	if strings.Contains(hash, "$") {
+		// test case: extra_fields_at_the_end
+		return argon2Variant, nil, nil, nil, ErrInvalidHash
+	}
+
+	// DecodeString() ignores newline characters \r and \n
+	if strings.ContainsAny(hash, "\r\n") {
+		// test case: newline_in_key
+		return argon2Variant, nil, nil, nil, ErrInvalidHash
+	}
+
+	key, err = base64.RawStdEncoding.Strict().DecodeString(hash)
 	if err != nil {
+		// test case: bad_base64_key
 		return argon2Variant, nil, nil, nil, err
 	}
 	params.KeyLength = uint32(len(key))
 
+	// test cases: valid_argon2i, valid_argon2id
 	return argon2Variant, params, salt, key, nil
 }
 
