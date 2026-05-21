@@ -22,7 +22,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version: 1.24.x
+          go-version: 1.25.x
       - run: go version
 
       - name: Checkout repository
@@ -55,7 +55,7 @@ jobs:
 
       - name: Upload coverage reports to Codecov
         if: github.event_name == 'push'
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: pilinux/argon2
