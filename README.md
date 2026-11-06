@@ -135,7 +135,6 @@ For guidance, visit: [rfc9106][04]
 
 [01]: https://pkg.go.dev/golang.org/x/crypto@v0.19.0/argon2
 [02]: https://pages.nist.gov/800-63-3/sp800-63b.html
-[03]: github.com/alexedwards/argon2id
 [04]: https://datatracker.ietf.org/doc/html/rfc9106#name-argon2-algorithm
 [11]: https://github.com/pilinux/argon2/actions/workflows/codeql-analysis.yml/badge.svg
 [12]: https://github.com/pilinux/argon2/actions/workflows/go.yml/badge.svg
